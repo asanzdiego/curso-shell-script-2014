@@ -1,0 +1,45 @@
+#! /bin/bash
+
+# script que empaqueta y comprime el contenido de la carpeta /root/logs/
+# en un fichero llamado total-aaaa.mm.dd-HH.MM.SS.tar.zip
+# en la carpeta /root/copia_seguridad
+
+############################################################
+# INICIO VARIABLES
+############################################################
+
+# variable con la fecha en el formato indicado (aaaa.mm.dd-HH.MM.SS)
+FECHA=`date +%Y.%m.%d-%H.%M.%S`
+
+# variable con la ruta de los ficheros
+RUTA_FICHEROS=~/copia_seguridad
+
+# variable con el fichero con la fecha de la última copia total
+FICHERO_ULTIMA_COPIA_TOTAL=$RUTA_FICHEROS/fecha-ultima-copia-total.txt
+
+# variable con el fichero comprimido
+FICHERO_COMPRIMIDO=$RUTA_FICHEROS/total-$FECHA.tar.zip
+
+# variable con el directorio que queremos copiar y comprimir
+DIRECTORIO_A_COPIAR=~/directorio_a_copiar
+
+############################################################
+# FIN VARIABLES
+############################################################
+
+# si no exixte el directorio a copiar mostramos un error y paramos la ejecución
+if [ ! -d $DIRECTORIO_A_COPIAR ]; then
+	echo "No exixte el directorio a copiar."
+	exit 1
+fi
+
+# si no exixte el directorio de los ficheros lo creamos
+if [ ! -d $RUTA_FICHEROS ]; then
+	mkdirs $RUTA_FICHEROS
+fi
+
+# guardar la fecha de la última copia total en FICHERO_ULTIMA_COPIA_TOTAL
+echo $FECHA > $FICHERO_ULTIMA_COPIA_TOTAL
+
+# empaquetamos y comprimimos el DIRECTORIO_A_COPIAR en FICHERO_COMPRIMIDO (mediante zip)
+zip -r $FICHERO_COMPRIMIDO $DIRECTORIO_A_COPIAR

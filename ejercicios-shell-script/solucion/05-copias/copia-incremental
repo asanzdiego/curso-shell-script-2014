@@ -1,0 +1,102 @@
+#! /bin/bash
+
+# script que empaqueta y comprime los ficheros modificados desde la última
+# copia ya sea incremental, diferencial o total de la carpeta /root/logs/
+# en un fichero llamado diferencial-aaaa.mm.dd-HH.MM.SS.tar.zip
+# en la carpeta /root/copia_seguridad
+
+############################################################
+# INICIO VARIABLES
+############################################################
+
+# variable con la fecha en el formato indicado (aaaa.mm.dd-HH.MM.SS)
+FECHA=`date +%Y.%m.%d-%H.%M.%S`
+
+# variable con la ruta de los ficheros
+RUTA_FICHEROS=~/copia_seguridad
+
+# variable con el fichero con la fecha de la última copia total
+FICHERO_ULTIMA_COPIA_TOTAL=$RUTA_FICHEROS/fecha-ultima-copia-total.txt
+
+# variable con el fichero con la fecha de la última copia diferencial
+FICHERO_ULTIMA_COPIA_DIFERENCIAL=$RUTA_FICHEROS/fecha-ultima-copia-diferencial.txt
+
+# variable con el fichero con la fecha de la última copia incremental
+FICHERO_ULTIMA_COPIA_INCREMENTAL=$RUTA_FICHEROS/fecha-ultima-copia-incremental.txt
+
+# variable con el fichero comprimido
+FICHERO_COMPRIMIDO=$RUTA_FICHEROS/diferencial-$FECHA.tar.zip
+
+# variable con eldirectorio que queremos copiar y comprimir
+DIRECTORIO_A_COPIAR=~/directorio_a_copiar
+
+############################################################
+# FIN VARIABLES
+############################################################
+
+############################################################
+# INICIO FUNCIONES
+############################################################
+
+# función que empaqueta y comprime los ficheros modificados
+# desde la última copía incremental
+function copia_desde_ultima_incremental() {
+
+	# empaqueta y comprime los ficheros modificados desde la última copia incremental
+	find $DIRECTORIO_A_COPIAR/*.txt -newer $FICHERO_ULTIMA_INCREMENTAL | zip -@ $FICHERO_COMPRIMIDO
+
+	# guardar la fecha de la última copia incremental en FICHERO_ULTIMA_COPIA_INCREMENTAL
+	echo $FECHA > $FICHERO_ULTIMA_COPIA_INCREMENTAL
+
+	# salimos
+	exit 0
+}
+
+# función que empaqueta y comprime los ficheros modificados
+# desde la última copía diferencial
+function copia_desde_ultima_diferencial() {
+
+	# guardar la fecha de la última copia incremental en FICHERO_ULTIMA_COPIA_INCREMENTAL
+	echo $FECHA > $FICHERO_ULTIMA_COPIA_INCREMENTAL
+
+	# empaqueta y comprime los ficheros modificados desde la última copia diferencial
+	find $DIRECTORIO_A_COPIAR/*.txt -newer $FICHERO_ULTIMA_DIFERENCIAL | zip -@ $FICHERO_COMPRIMIDO
+
+	# salimos
+	exit 0
+}
+
+# función que empaqueta y comprime los ficheros modificados
+# desde la última copía total
+function copia_desde_ultima_total() {
+
+	# guardar la fecha de la última copia incremental en FICHERO_ULTIMA_COPIA_INCREMENTAL
+	echo $FECHA > $FICHERO_ULTIMA_COPIA_INCREMENTAL
+
+	# empaqueta y comprime los ficheros modificados desde la última copia total
+	find $DIRECTORIO_A_COPIAR/*.txt -newer $FICHERO_ULTIMA_COPIA | zip -@ $FICHERO_COMPRIMIDO
+
+	# salimos
+	exit 0
+}
+
+############################################################
+# FIN FUNCIONES
+############################################################
+
+# si no exixte el directorio a copiar mostramos un error y paramos la ejecución
+if [ ! -d $DIRECTORIO_A_COPIAR ]; then
+	echo "No exixte el directorio a copiar."
+	exit 1
+fi
+
+# si no existe el FICHERO_ULTIMA_COPIA_TOTAL mostramos un error y paramos la ejecución
+if [ ! -e $FICHERO_ULTIMA_COPIA_TOTAL ]; then
+	echo "No hay última copia total."
+	exit 1
+fi
+
+# si no existe el FICHERO_ULTIMA_COPIA_INCREMENTAL
+if [ ! -e $FICHERO_ULTIMA_COPIA_INCREMENTAL ]; then
+	copia_desde_ultima_total
+fi

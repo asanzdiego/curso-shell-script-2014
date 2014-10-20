@@ -1,0 +1,57 @@
+#! /bin/bash
+
+# script que empaqueta y comprime los ficheros modificados
+# desde la última copia-incremental si existe y es la copia más reciente
+# sino desde la última copia-diferencial si existe y es la copia más reciente
+# sino desde la última copia-total si existe
+# en un fichero llamado diferencial-aaaa.mm.dd-HH.MM.SS.tar.zip
+# en la carpeta /root/copia_seguridad
+
+############################################################
+# INICIO VARIABLES
+############################################################
+
+# variable con la fecha en el formato indicado (aaaa.mm.dd-HH.MM.SS)
+FECHA=`date +%Y.%m.%d-%H.%M.%S`
+
+# variable con la ruta de los ficheros
+RUTA_FICHEROS=~/copia_seguridad
+
+# variable con el fichero con la fecha de la última copia total
+FICHERO_ULTIMA_COPIA_TOTAL=$RUTA_FICHEROS/fecha-ultima-copia-total.txt
+
+# variable con el fichero con la fecha de la última copia diferencial
+FICHERO_ULTIMA_COPIA_DIFERENCIAL=$RUTA_FICHEROS/fecha-ultima-copia-diferencial.txt
+
+# variable con el fichero comprimido
+FICHERO_COMPRIMIDO=$RUTA_FICHEROS/diferencial-$FECHA.tar.zip
+
+# variable con eldirectorio que queremos copiar y comprimir
+DIRECTORIO_A_COPIAR=~/directorio_a_copiar
+
+############################################################
+# FIN VARIABLES
+############################################################
+
+# si no exixte el directorio a copiar mostramos un error y paramos la ejecución
+if [ ! -d $DIRECTORIO_A_COPIAR ]; then
+	echo "No exixte el directorio a copiar."
+	exit 1
+fi
+
+# si no existe el FICHERO_ULTIMA_COPIA_TOTAL mostramos un error y paramos la ejecución
+if [ ! -e $FICHERO_ULTIMA_COPIA_TOTAL ]; then
+	echo "No hay última copia total."
+	exit 1
+fi
+
+# si no exixte el directorio de los ficheros lo creamos
+if [ ! -d $RUTA_FICHEROS ]; then
+	mkdirs $RUTA_FICHEROS
+fi
+
+# guardar la fecha de la última copia diferencial en FICHERO_ULTIMA_COPIA_DIFERENCIAL
+echo $FECHA > $FICHERO_ULTIMA_COPIA_DIFERENCIAL
+
+# empaquetamos y comprimimos los ficheros modificados desde la última copia total
+find $DIRECTORIO_A_COPIAR/* -newer $FICHERO_ULTIMA_COPIA_TOTAL | zip -@ $FICHERO_COMPRIMIDO

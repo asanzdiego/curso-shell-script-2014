@@ -1,0 +1,27 @@
+#! /bin/bash
+
+# si el número de parámetros es igual a 0
+if [ "$#" == "0" ]; then
+
+	# muestra el calendario del mes actual y sale
+	cal
+	exit 0
+fi
+
+# si el número de parámetros es distinto de 1
+if [ "$#" != "1" ]; then
+
+	# muestra un mensaje de error y sale
+	echo "Sólo se admite un parámetro."
+	exit 1
+fi
+
+# dependiendo del parámetro introducido
+case $1 in
+    -c|--corta) date +"%d/%m/%Y" ;;
+    -l|--larga) date +"Hoy es el día '%d' del mes '%m' del año '%Y'." ;;
+    *) echo "Opción incorrecta." ; exit 2 ;;
+esac
+
+# si todo ha ido bien sale
+exit 0

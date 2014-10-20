@@ -1,0 +1,19 @@
+#! /bin/bash
+
+# si el número de parámetros es distinto de 2
+if [ $# -ne 2 ]; then
+	echo "Para ejecutar este script se necesitan 2 números."
+	exit 2
+fi
+
+#inicializamos variables
+ELEVADO=1
+
+# para cada parámetro introducido
+for ((CONTADOR=0; CONTADOR<$2; CONTADOR++)); do
+
+  ELEVADO=`echo $ELEVADO $1 | awk '{ print $1*$2 }'`
+
+done
+
+echo $ELEVADO

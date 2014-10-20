@@ -1,0 +1,62 @@
+#! /bin/bash
+
+# función que verifica que el número de parámetros es correcto
+function verificarNumeroParametros() {
+
+	# si el número de parámetros es igual a 0
+	if [ "$#" == "0" ]; then
+
+		# muestra un mensaje de error y sale
+		echo "Hay que introducir al menos un parámetro."
+		exit 1
+	fi
+}
+
+# funcion que crea la jaula si no existe
+function crearJaula() {
+
+	JAULA=~/.jaula
+
+	if [ -e $JAULA ]; then
+
+		# si la jaula existe y no es un directorio
+		if [ ! -d $JAULA ]; then
+
+			# muestra un mensaje de error y sale
+			echo "El fichero '~/.jaula' no es un directorio."
+			exit 3
+		fi
+
+	else
+
+		# creamos la jaula
+		mkdir $JAULA
+	fi
+}
+
+# función que mueve a la jaula los ficheros pasados por parámetro
+function moverFicheros() {
+
+	# ejecutar mientras haya parámetros
+	while [ "x$1" != "x" ]; do
+
+		FICHERO=$1
+
+		# si el fichero pasado por parámeto no existe
+		if [ ! -e $FICHERO ]; then
+
+			# muestra un mensaje de error y sale
+			echo "El fichero '$FICHERO' no existe."
+			exit 2
+		fi
+
+		# mueve el fichero a la jaula
+		mv $FICHERO $JAULA
+
+		shift # pasamos al siguiente parámetro
+	done
+}
+
+verificarNumeroParametros $@
+crearJaula
+moverFicheros $@

@@ -1,0 +1,13 @@
+#! /bin/bash
+
+# si el número de parámetros es distinto de 0
+if [ "$#" != "0" ]; then
+
+	# muestra un mensaje de error y sale
+	echo "No se permiten parámetros."
+	exit 1
+fi
+
+# muestra el listado ordenado de menor a mayor por el tamaño
+# sacando sólo el nombre del archivo y el número de línea
+ls -l | sort -nk 5 | awk '{ print $8 }' | nl

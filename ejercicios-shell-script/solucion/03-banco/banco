@@ -1,0 +1,151 @@
+#! /bin/bash
+
+BANCO_FILE=~/.banco.txt
+
+function help() {
+
+cat << DESCRIPCION_AYUDA
+SYNOPSIS
+	$0 OPCION [PARAMETRO_2] ... [PARAMETRO_N]
+
+DESCRIPCIÓN
+	Añade, busca, lista y opera con movimientos bancarios.
+
+OPCIONES
+	-h --help                           Muestra una ayuda.
+	-a --add    FECHA CONCEPTO CANTIDAD Añade un movimiento bancario.
+	-s --search PATRÓN                  Busca un movimiento bancario.
+	-l --list                           Lista los movimientos bancarios ordenados por fecha.
+	-t --total                          Calcula el saldo total de la cuenta.
+
+CÓDIGOS DE RETORNO
+	0 Si no hay ningún error.
+	1 SI la opción introducida no es válida.
+	2 si un argumento númerico no es un número.
+	3 Si el número de parámetros es erróneo.
+	4 si un argumento de tipo fecha no es una fecha.
+	5 Si hay un error de entrada/salida en $BANCO_FILE.
+DESCRIPCION_AYUDA
+
+}
+
+
+function exitWithError() {
+
+    LINEA_ERROR=$1
+    MENSAJE_ERROR=$2
+    CODIGO_ERROR=$3
+
+	echo "$0: línea $LINEA_ERRO: Error $CODIGO_ERROR: $MENSAJE_ERROR"
+	exit $CODIGO_ERROR
+}
+
+function testDateExists() {
+
+    DATE=$1
+
+    # si ya existe un movimiento bancario para la misma fecha
+    if [ -n "`grep -E ^$DATE $BANCO_FILE`" ]; then
+        exitWithError $LINENO "Ya existe un movimiento bancario para la fecha '$DATE'." 12
+    fi
+}
+
+function testIsDate() {
+
+	DATE=$1
+
+	EXPRESION_CONCUERDA=`echo $DATE | grep -E \
+		^20[0-9]{2}-[01][0-9]-[0-3][0-9]$`
+
+	if [ -z "$EXPRESION_CONCUERDA" ]; then
+		exitWithError $LINENO "'$DATE' no es una fecha" 4
+	fi
+}
+
+function testIsNubmer() {
+
+	NUMBER=$1
+
+	if [ -n "$NUMBER" \
+	-a $NUMBER != "0" \
+	-a "`echo $NUMBER | awk '{ print $1*1 }'`" != "$NUMBER" ]; then
+
+		exitWithError $LINENO "'$NUMBER' no es un número" 2
+	fi
+}
+
+function testParameterNumer() {
+
+	PARAMETER_NUMBER=$1
+	shift
+	if [ $# -ne $PARAMETER_NUMBER ]; then
+		exitWithError $LINENO \
+		"Número de parámetros " \
+		"obligatorio: $PARAMETER_NUMBER" 3
+	fi
+}
+
+function add() {
+
+	testParameterNumer 3 $@
+
+	FECHA=$1
+	CONCEPTO=$2
+	CANTIDAD=$3
+
+	testIsDate $FECHA
+	testDateExists $FECHA
+	testIsNubmer $CANTIDAD
+
+	echo "$FECHA $CONCEPTO $CANTIDAD" >> $BANCO_FILE
+}
+
+function search() {
+
+	testParameterNumer 1 $@
+
+	PATRON=$1
+
+	grep $PATRON $BANCO_FILE
+}
+
+# lista movimientos ordenados por fecha
+function list() {
+
+	sort -nk 1 $BANCO_FILE
+}
+
+function total() {
+
+	awk '{s+=$3} END {print "Total="s}' $BANCO_FILE
+}
+
+function createFileIfNotExists() {
+
+	touch $BANCO_FILE
+	if [ "$?" != "0" ]; then
+		exitWithError $LINENO \
+		"Error de entrada/salida en" \
+		"el fichero $BANCO_FILE" 5
+	fi
+}
+
+function menu() {
+
+	case $1 in
+		-h|--help)		help;;
+		-a|--add)	    shift; 	add $@;;
+		-s|--search)	shift;	search $@;;
+		-l|--list)		list;;
+		-t|--total)		total;;
+		*) exitWithError $LINENO "Opción '$1' inválida." 1
+	esac
+}
+
+function init() {
+
+	createFileIfNotExists
+	menu $@
+}
+
+init $@

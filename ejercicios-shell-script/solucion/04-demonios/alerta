@@ -1,0 +1,45 @@
+#! /bin/bash
+
+# script que escribe la fecha en formato 'dd/mm/aaaa hh:mm:ss' cada X segundos
+# en el log '~/alerta.log'
+
+# función de ayuda
+function ayuda() {
+cat << DESCRIPCION_AYUDA
+SYNOPIS
+    $0 [SEGUNDOS]
+DESCRIPCION
+    Escribe la fecha cada X segundos en el log '~/alerta.log'
+CODIGOS DE RETORNO
+    0 Si no hay ningún error
+DESCRIPCION_AYUDA
+}
+
+# si primer parámetro == '-h' o == '--help'
+if [ "$1" == "-h" -o "$1" == "--help" ]; then
+    ayuda
+    exit 0
+fi
+
+function main() {
+
+    DEFAULT=2
+
+    # comprobar que SEGUNDOS es un número
+    if [ "$SEGUNDOS" != "0" -a "`echo $SEGUNDOS | awk '{ print $1 * 1 }'`" != "$SEGUNDOS" ]; then
+        echo "El parámetro '$1' no es un número. Se cogerá el valor por defecto ($DEFAULT)"
+        SEGUNDOS=$DEFAULT
+    fi
+
+    # reinicio alerta.log
+    echo "" > ~/alerta.log
+
+    while [ true ]; do
+        date +%d/%m/%Y" "%H:%M:%S >> ~/alerta.log
+        sleep $SEGUNDOS
+    done
+}
+
+echo $$
+
+main $1
