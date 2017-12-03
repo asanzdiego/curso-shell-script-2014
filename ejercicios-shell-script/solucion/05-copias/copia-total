@@ -1,9 +1,5 @@
 #! /bin/bash
 
-# script que empaqueta y comprime el contenido de la carpeta /root/logs/
-# en un fichero llamado total-aaaa.mm.dd-HH.MM.SS.tar.zip
-# en la carpeta /root/copia_seguridad
-
 ############################################################
 # INICIO VARIABLES
 ############################################################
@@ -27,7 +23,8 @@ DIRECTORIO_A_COPIAR=~/directorio_a_copiar
 # FIN VARIABLES
 ############################################################
 
-# si no exixte el directorio a copiar mostramos un error y paramos la ejecución
+# si no exixte el directorio a copiar mostramos un error
+# y paramos la ejecución
 if [ ! -d $DIRECTORIO_A_COPIAR ]; then
 	echo "No exixte el directorio a copiar."
 	exit 1
@@ -38,8 +35,9 @@ if [ ! -d $RUTA_FICHEROS ]; then
 	mkdirs $RUTA_FICHEROS
 fi
 
+# empaquetamos y comprimimos el DIRECTORIO_A_COPIAR
+# en FICHERO_COMPRIMIDO (mediante zip)
+zip -r $FICHERO_COMPRIMIDO $DIRECTORIO_A_COPIAR
+
 # guardar la fecha de la última copia total en FICHERO_ULTIMA_COPIA_TOTAL
 echo $FECHA > $FICHERO_ULTIMA_COPIA_TOTAL
-
-# empaquetamos y comprimimos el DIRECTORIO_A_COPIAR en FICHERO_COMPRIMIDO (mediante zip)
-zip -r $FICHERO_COMPRIMIDO $DIRECTORIO_A_COPIAR

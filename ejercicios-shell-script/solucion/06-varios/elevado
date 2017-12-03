@@ -8,11 +8,13 @@ fi
 
 #inicializamos variables
 ELEVADO=1
+BASE=$1
+EXPONENTE=$2
 
 # para cada parámetro introducido
-for ((CONTADOR=0; CONTADOR<$2; CONTADOR++)); do
+for ((CONTADOR=0; CONTADOR<$EXPONENTE; CONTADOR++)); do
 
-  ELEVADO=`echo $ELEVADO $1 | awk '{ print $1*$2 }'`
+  ELEVADO=`echo $ELEVADO $BASE | awk '{ print $1*$2 }'`
 
 done
 

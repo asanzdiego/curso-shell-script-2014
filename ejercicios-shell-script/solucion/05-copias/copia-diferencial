@@ -1,11 +1,8 @@
 #! /bin/bash
 
 # script que empaqueta y comprime los ficheros modificados
-# desde la última copia-incremental si existe y es la copia más reciente
-# sino desde la última copia-diferencial si existe y es la copia más reciente
-# sino desde la última copia-total si existe
+# desde la última copia-total
 # en un fichero llamado diferencial-aaaa.mm.dd-HH.MM.SS.tar.zip
-# en la carpeta /root/copia_seguridad
 
 ############################################################
 # INICIO VARIABLES
@@ -39,7 +36,8 @@ if [ ! -d $DIRECTORIO_A_COPIAR ]; then
 	exit 1
 fi
 
-# si no existe el FICHERO_ULTIMA_COPIA_TOTAL mostramos un error y paramos la ejecución
+# si no existe el FICHERO_ULTIMA_COPIA_TOTAL mostramos un error
+# y paramos la ejecución
 if [ ! -e $FICHERO_ULTIMA_COPIA_TOTAL ]; then
 	echo "No hay última copia total."
 	exit 1
@@ -50,8 +48,10 @@ if [ ! -d $RUTA_FICHEROS ]; then
 	mkdirs $RUTA_FICHEROS
 fi
 
-# guardar la fecha de la última copia diferencial en FICHERO_ULTIMA_COPIA_DIFERENCIAL
-echo $FECHA > $FICHERO_ULTIMA_COPIA_DIFERENCIAL
-
-# empaquetamos y comprimimos los ficheros modificados desde la última copia total
+# empaquetamos y comprimimos los ficheros modificados
+# desde la última copia total
 find $DIRECTORIO_A_COPIAR/* -newer $FICHERO_ULTIMA_COPIA_TOTAL | zip -@ $FICHERO_COMPRIMIDO
+
+# guardar la fecha de la última copia diferencial
+# en FICHERO_ULTIMA_COPIA_DIFERENCIAL
+echo $FECHA > $FICHERO_ULTIMA_COPIA_DIFERENCIAL
