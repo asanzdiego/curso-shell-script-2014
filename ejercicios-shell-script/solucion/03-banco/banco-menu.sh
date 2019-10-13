@@ -1,5 +1,9 @@
 #! /bin/bash
 
+set -o errexit  # the script ends if a command fails
+set -o pipefail # the script ends if a command fails in a pipe
+set -o nounset  # the script ends if it uses an undeclared variable
+
 # script que añade, busca y opera con movimientos bancarios.
 
 # variables globales
@@ -46,18 +50,18 @@ function error() {
 # función para añadir un movimiento bancario
 function add() {
     echo "AÑADIR UN MOVIMIENTO BANCARIO"
-    read -p "Introduce el fecha: " FECHA
-    read -p "Introduce el concepto: " CONCEPTO
-    read -p "Introduce la cantidad: " CANTIDAD
-    $BANCO_SCRIPT --add $FECHA $CONCEPTO $CANTIDAD
+    read -r -p "Introduce el fecha: " FECHA
+    read -r -p "Introduce el concepto: " CONCEPTO
+    read -r -p "Introduce la cantidad: " CANTIDAD
+    $BANCO_SCRIPT --add "$FECHA" "$CONCEPTO" "$CANTIDAD"
     elegir_menu
 }
 
 # función para búscar un movimiento bancario
 function search() {
     echo "BUSCAR MOVIMIENTO BANCARIO"
-    read -p "Introduce un patrón de búsqueda: " PATRON
-    $BANCO_SCRIPT --search $PATRON
+    read -r -p "Introduce un patrón de búsqueda: " PATRON
+    $BANCO_SCRIPT --search "$PATRON"
     elegir_menu
 }
 
@@ -90,21 +94,21 @@ function opcion_invalida() {
 function elegir_menu() {
 
     menu
-    read -p "Elige una opción: " OPCION
+    read -r -p "Elige una opción: " OPCION
     clear
 
-    case $OPCION in
+    case "$OPCION" in
         a) add ;;
         b) search ;;
         l) list ;;
         c) total ;;
         s) salir ;;
-        *) opcion_invalida $OPCION;;
+        *) opcion_invalida "$OPCION";;
     esac
 }
 
 # si primer parámetro == '-h' o == '--help'
-if [ "$1" == "-h" -o "$1" == "--help" ]; then
+if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
     ayuda
     exit 0
 fi

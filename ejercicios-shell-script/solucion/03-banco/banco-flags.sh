@@ -1,5 +1,9 @@
 #! /bin/bash
 
+set -o errexit  # the script ends if a command fails
+set -o pipefail # the script ends if a command fails in a pipe
+set -o nounset  # the script ends if it uses an undeclared variable
+
 # script que añade, busca y opera con movimientos bancarios.
 
 # variables globales
@@ -35,14 +39,14 @@ DESCRIPCION_AYUDA
 # función para añadir un movimiento bancario
 function add() {
     echo "AÑADIR UN MOVIMIENTO BANCARIO"
-    $BANCO_SCRIPT --add $@
+    $BANCO_SCRIPT --add "$@"
     echo "-----------------------------"
 }
 
 # función para búscar un movimiento bancario
 function search() {
     echo "BUSCAR MOVIMIENTO BANCARIO ($1)"
-    $BANCO_SCRIPT --search $1
+    $BANCO_SCRIPT --search "$1"
     echo "-----------------------------"
 }
 
@@ -69,10 +73,10 @@ function opcion_invalida() {
 while getopts "ha:s:lt" option ; do 
     case "$option" in 
         h) ayuda ;;
-        a) add $OPTARG ;;
-        s) search $OPTARG ;;
+        a) add "$OPTARG" ;;
+        s) search "$OPTARG" ;;
         l) list ;;
         t) total ;;
-        *) opcion_invalida $option ;;
+        *) opcion_invalida "$option" ;;
     esac
 done

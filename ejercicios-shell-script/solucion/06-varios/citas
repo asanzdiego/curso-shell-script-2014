@@ -1,5 +1,9 @@
 #! /bin/bash
 
+set -o errexit  # the script ends if a command fails
+set -o pipefail # the script ends if a command fails in a pipe
+set -o nounset  # the script ends if it uses an undeclared variable
+
 # script que gestiona las citas de una consulta.
 
 # Para cada una de las opciones se comprobará que se introducen el número de parámetros correctos con el formato correcto.
@@ -49,34 +53,34 @@ function error() {
 	echo "$0: Línea $1: Error $3: $2"
 
 	# termina la ejecución del script con el codigo de retorno indicado
-	exit $3
+	exit "$3"
 }
 
 # función que comprueba el número de parámetros introducido
 #	$1 linea error
 #	$2 número de parámetros esperados
-#	$@ parámetros
+#	"$@" parámetros
 function numero_parametros() {
 
 	# líenea error
-	LINEA_ERROR=$1
+	LINEA_ERROR="$1"
 
 	# eliminamos el primer parámetro
 	shift
 
 	# número de parámetros esperados
-	NUMERO_PARAMETROS_ESPERADOS=$1
+	NUMERO_PARAMETROS_ESPERADOS="$1"
 
 	# volvemos a eliminar el primer parámetro
 	shift
 
 	# número de parámetros que nos queda
-	NUMERO_PARAMETROS_REALES=$#
+	NUMERO_PARAMETROS_REALES="$#"
 
 	# si el número de parámetros introducido es distinto del esperado
 	if [ "$NUMERO_PARAMETROS_REALES" != "$NUMERO_PARAMETROS_ESPERADOS" ]; then
 
-		error $LINEA_ERROR "Número de parámetros '$NUMERO_PARAMETROS_REALES' distinto de '$NUMERO_PARAMETROS_ESPERADOS'." 1
+		error "$LINEA_ERROR" "Número de parámetros '$NUMERO_PARAMETROS_REALES' distinto de '$NUMERO_PARAMETROS_ESPERADOS'." 1
 	fi
 }
 
@@ -86,21 +90,21 @@ function numero_parametros() {
 function formato_hora() {
 
 	# líenea error
-	LINEA_ERROR=$1
+	LINEA_ERROR="$1"
 
 	# recogemos la hora
-	HORA=$2
+	HORA="$2"
 
 	# si la hora introducida no es un número de 2 cifras
-	if [ -z "`echo $HORA | grep -E ^[0-9]{2}$`" ]; then
+	if [ -z "$(echo "$HORA" | grep -E "^[0-9]{2}$")" ]; then
 
-		error $LINEA_ERROR "La hora '$HORA' no es un número de 2 cifras." 2
+		error "$LINEA_ERROR" "La hora '$HORA' no es un número de 2 cifras." 2
 	fi
 
 	# si la hora no está comprendida entre 00 y 23
-	if [ $HORA -gt 23 ]; then
+	if [ "$HORA" -gt 23 ]; then
 
-		error $LINEA_ERROR "La hora '$HORA' no está comprendida entre 00 y 23" 2
+		error "$LINEA_ERROR" "La hora '$HORA' no está comprendida entre 00 y 23" 2
 	fi
 }
 
@@ -110,24 +114,24 @@ function formato_hora() {
 function solape_hora_inicial() {
 
 	# líenea error
-	LINEA_ERROR=$1
+	LINEA_ERROR="$1"
 
 	# recogemos la hora inicial
-	HORA_INICIAL=$2
+	HORA_INICIAL="$2"
 
 	# fichero con el programa awk
-	FICHERO_PROGRAMA_AWK=~/awk-program.txt
+	FICHERO_PROGRAMA_AWK="$HOME/awk-program.txt"
 
 	# sentencia awk para buscar si ya existe una cita que se solape
-	echo "{ if ( $HORA_INICIAL >= \$1 && $HORA_INICIAL < \$2 ) print \$0 }" > $FICHERO_PROGRAMA_AWK
+	echo "{ if ( $HORA_INICIAL >= \$1 && $HORA_INICIAL < \$2 ) print \$0 }" > "$FICHERO_PROGRAMA_AWK"
 
 	# ejecutamos el comando y guardamos el resultado en una variable
-	CITA_SOLAPADA=`more $CITAS_FILE | awk -f $FICHERO_PROGRAMA_AWK`
+	CITA_SOLAPADA=$(more "$CITAS_FILE" | awk -f "$FICHERO_PROGRAMA_AWK")
 
 	# si existe alguna cita que se solape
 	if [ -n "$CITA_SOLAPADA" ]; then
 
-		error $LINEA_ERROR "La hora inicial '$HORA_INICIAL' se solapa con la cita '$CITA_SOLAPADA'." 3
+		error "$LINEA_ERROR" "La hora inicial '$HORA_INICIAL' se solapa con la cita '$CITA_SOLAPADA'." 3
 	fi
 }
 
@@ -137,24 +141,24 @@ function solape_hora_inicial() {
 function solape_hora_final() {
 
 	# líenea error
-	LINEA_ERROR=$1
+	LINEA_ERROR="$1"
 
 	# recogemos la hora final
-	HORA_FINAL=$2
+	HORA_FINAL="$2"
 
 	# fichero con el programa awk
-	FICHERO_PROGRAMA_AWK=~/awk-program.txt
+	FICHERO_PROGRAMA_AWK="$HOME/awk-program.txt"
 
 	# sentencia awk para buscar si ya existe una cita que se solape
-	echo "{ if ( $HORA_FINAL > \$1 && $HORA_FINAL <= \$2 ) print \$0 }" > $FICHERO_PROGRAMA_AWK
+	echo "{ if ( $HORA_FINAL > \$1 && $HORA_FINAL <= \$2 ) print \$0 }" > "$FICHERO_PROGRAMA_AWK"
 
 	# ejecutamos el comando y guardamos el resultado en una variable
-	CITA_SOLAPADA=`more $CITAS_FILE | awk -f $FICHERO_PROGRAMA_AWK`
+	CITA_SOLAPADA=$(more "$CITAS_FILE" | awk -f "$FICHERO_PROGRAMA_AWK")
 
 	# si existe alguna cita que se solape
 	if [ -n "$CITA_SOLAPADA" ]; then
 
-		error $LINEA_ERROR "La hora final '$HORA_FINAL' se solapa con la cita '$CITA_SOLAPADA'." 3
+		error "$LINEA_ERROR" "La hora final '$HORA_FINAL' se solapa con la cita '$CITA_SOLAPADA'." 3
 	fi
 }
 
@@ -164,15 +168,15 @@ function solape_hora_final() {
 function nombre_paciente() {
 
 	# líenea error
-	LINEA_ERROR=$1
+	LINEA_ERROR="$1"
 
 	# recogemos el nombre del paciente
-	NOMBRE_PACIENTE=$2
+	NOMBRE_PACIENTE="$2"
 
 	# si el nombre ya está en el fichero de citas
-	if [ -n "`grep $NOMBRE_PACIENTE $CITAS_FILE`" ]; then
+	if [ -n "$(grep "$NOMBRE_PACIENTE" "$CITAS_FILE")" ]; then
 
-		error $LINEA_ERROR "Nombre del paciente '$NOMBRE_PACIENTE' repetido." 4
+		error "$LINEA_ERROR" "Nombre del paciente '$NOMBRE_PACIENTE' repetido." 4
 	fi
 }
 
@@ -181,12 +185,12 @@ function nombre_paciente() {
 function error_inexperado() {
 
 	# líenea error
-	LINEA_ERROR=$1
+	LINEA_ERROR="$1"
 
 	# si ocurre algún error inexperado
 	if [ "$?" != "0" ]; then
 
-		error $LINEA_ERROR "Error inexperado." 6
+		error "$LINEA_ERROR" "Error inexperado." 6
 	fi
 }
 
@@ -197,30 +201,30 @@ function error_inexperado() {
 function add() {
 
 	# comprobamos que el número de parámetros sea igual a 3
-	numero_parametros $LINENO 3 $@
+	numero_parametros $LINENO 3 "$@"
 
 	# inicializamos las variables con los valores de los parámetros introducidos
-	HORA_INICIAL=$1
-	HORA_FINAL=$2
+	HORA_INICIAL="$1"
+	HORA_FINAL="$2"
 	NOMBRE_PACIENTE=$3
 
 	# comprobamos que el formato de la hora inicial sea el correcto
-	formato_hora $LINENO $HORA_INICIAL
+	formato_hora $LINENO "$HORA_INICIAL"
 
 	# comprobamos que la hora inicial no se solape con alguna cita ya introducida
-	solape_hora_inicial $LINENO $HORA_INICIAL
+	solape_hora_inicial $LINENO "$HORA_INICIAL"
 
 	# comprobamos que el formato de la hora final sea el correcto
-	formato_hora $LINENO $HORA_FINAL
+	formato_hora $LINENO "$HORA_FINAL"
 
 	# comprobamos que la hora final no se solape con alguna cita ya introducida
-	solape_hora_final $LINENO $HORA_FINAL
+	solape_hora_final $LINENO "$HORA_FINAL"
 
 	# comprobamos que no exista ya el nombre del paciente
-	nombre_paciente $LINENO $NOMBRE_PACIENTE
+	nombre_paciente $LINENO "$NOMBRE_PACIENTE"
 
 	# grabamos al final del fichero
-	echo $HORA_INICIAL $HORA_FINAL $NOMBRE_PACIENTE >> $CITAS_FILE
+	echo "$HORA_INICIAL" "$HORA_FINAL" "$NOMBRE_PACIENTE" >> "$CITAS_FILE"
 
 	# comprobamos que no haya habido ningún error inexperado
 	error_inexperado $LINENO
@@ -231,12 +235,12 @@ function add() {
 function search() {
 
 	# comprobamos que el número de parámetros sea igual a 1
-	numero_parametros $LINENO 1 $@
+	numero_parametros $LINENO 1 "$@"
 
-	PATRON=$1
+	PATRON="$1"
 
 	# buscamos el patrón introducido en el fichero de las citas
-	grep $PATRON $CITAS_FILE
+	grep "$PATRON" "$CITAS_FILE"
 
 	# comprobamos que no haya habido ningún error inexperado
 	error_inexperado $LINENO
@@ -247,15 +251,15 @@ function search() {
 function init() {
 
 	# comprobamos que el número de parámetros sea igual a 1
-	numero_parametros $LINENO 1 $@
+	numero_parametros $LINENO 1 "$@"
 
-	HORA_INICIAL=$1
+	HORA_INICIAL="$1"
 
 	# comprobamos que el formato de la hora inicial sea el correcto
-	formato_hora $LINENO $HORA_INICIAL
+	formato_hora $LINENO "$HORA_INICIAL"
 
 	# buscamos la hora inicial en el fichero de las citas
-	grep -E ^$HORA_INICIAL.*$ $CITAS_FILE
+	grep -E "^$HORA_INICIAL.*$" $CITAS_FILE
 
 	# comprobamos que no haya habido ningún error inexperado
 	error_inexperado $LINENO
@@ -266,15 +270,15 @@ function init() {
 function end() {
 
 	# comprobamos que el número de parámetros sea igual a 1
-	numero_parametros $LINENO 1 $@
+	numero_parametros $LINENO 1 "$@"
 
-	HORA_FINAL=$1
+	HORA_FINAL="$1"
 
 	# comprobamos que el formato de la hora final sea el correcto
-	formato_hora $LINENO $HORA_FINAL
+	formato_hora "$LINENO" "$HORA_FINAL"
 
 	# buscamos la hora final en el fichero de las citas
-	grep -E ^...$HORA_FINAL.*$ $CITAS_FILE
+	grep -E "^...$HORA_FINAL.*$" "$CITAS_FILE"
 
 	# comprobamos que no haya habido ningún error inexperado
 	error_inexperado $LINENO
@@ -284,7 +288,7 @@ function end() {
 function name() {
 
 	# comprobamos que el número de parámetros sea igual a 0
-	numero_parametros $LINENO 0 $@
+	numero_parametros $LINENO 0 "$@"
 
 	# ordenamos el fichero de las citas por la tercera columna
 	sort -k 3 $CITAS_FILE
@@ -297,7 +301,7 @@ function name() {
 function hour() {
 
 	# comprobamos que el número de parámetros sea igual a 0
-	numero_parametros $LINENO 0 $@
+	numero_parametros $LINENO 0 "$@"
 
 	# ordenamos el fichero de las citas por la primera columna en formato numérico
 	sort -nk 1 $CITAS_FILE
@@ -313,7 +317,7 @@ touch $CITAS_FILE
 error_inexperado
 
 # recogemos la opción selecionada
-OPCION=$1
+OPCION="$1"
 
 # eliminamos el primer parámetro
 shift
@@ -321,11 +325,11 @@ shift
 # dependiendo de la opción seleccionada
 case $OPCION in
 	-h|--help)	    ayuda;;
-	-a|--add)	    add $@;;
-	-s|--search)	search $@;;
-	-i|--init)	    init $@;;
-	-e|--end)	    end $@;;
-	-n|--name)	    name $@;;
-	-o|--hour)	    hour $@;;
+	-a|--add)	    add "$@";;
+	-s|--search)	search "$@";;
+	-i|--init)	    init "$@";;
+	-e|--end)	    end "$@";;
+	-n|--name)	    name "$@";;
+	-o|--hour)	    hour "$@";;
 	*)		        error $LINENO "Opción '$OPCION' inválida." 5;;
 esac

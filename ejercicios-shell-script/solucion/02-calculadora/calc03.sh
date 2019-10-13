@@ -1,5 +1,9 @@
 #! /bin/bash
 
+set -o errexit  # the script ends if a command fails
+set -o pipefail # the script ends if a command fails in a pipe
+set -o nounset  # the script ends if it uses an undeclared variable
+
 # script que devuelve el valor de la expresión introducida
 
 # función de ayuda
@@ -24,11 +28,11 @@ DESCRIPCION_AYUDA
 #    $3 código de retorno 
 function error() {
     echo "$0: línea $1: Error $3: $2"
-    exit $3
+    exit "$3"
 }
 
 # si primer parámetro == '-h' o == '--help'
-if [ "$1" == "-h" -o "$1" == "--help" ]; then
+if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
     ayuda
     exit 0
 fi
@@ -39,23 +43,19 @@ if [ $# -ne 1 ] ; then
 fi
 
 # si el parámetro no concuerda con la expresión regular
-if [ -z "`echo $1 | grep -E ^[\*\/0-9\(\)\+\-]+$`" ]; then
+if [ "$(echo "$1" | grep -E "^[\*\/0-9\(\)\+\-]+$")" == "" ]; then
     error $LINENO "Error de formato en la expresión introducida." 2
 fi
 
 # guardamos la expresión ($1) en el fichero oculto .expresion.awk
 # dentro de la HOME del usuario
-echo "{ print $1 }" > ~/.expresion.awk
-
-# si hay un error en el último comando ejecutado
-if [ "$?" != "0" ]; then
+if ! echo "{ print $1 }" > ~/.expresion.awk
+then
     error $LINENO "Error de entrada y salida." 3
 fi
 
 # ejecutamos awk con el fichero oculto .expresion.awk
-echo "" | awk -f ~/.expresion.awk 2> ~/.log.awk
-
-# si hay un error en el último comando ejecutado
-if [ "$?" != "0" ]; then
+if ! echo "" | awk -f ~/.expresion.awk 2> ~/.log.awk
+then
      error $LINENO "Error al ejecutar la expresión introducida." 4
 fi

@@ -1,5 +1,9 @@
 #! /bin/bash
 
+set -o errexit  # the script ends if a command fails
+set -o pipefail # the script ends if a command fails in a pipe
+set -o nounset  # the script ends if it uses an undeclared variable
+
 # script que divide dos números
 
 # función de ayuda
@@ -21,9 +25,9 @@ DESCRPCION_AYUDA
 
 function comprobarQueNoEsNumero() {
 
-	if [ -n "$1" \
-		-a "$1" != "0" \
-		-a "`echo $1 | awk '{ print $1*1 }'`" != "$1" ]; then
+	if [ -n "$1" ] \
+		&& [ "$1" != "0" ] \
+		&& [ "$(echo "$1" | awk '{ print $1*1 }')" != "$1" ]; then
 
 		echo "El parámetro '$1' no es un número"
 		ayuda
@@ -37,7 +41,7 @@ if [ $# -ne 2 ]; then
 	exit 1
 fi
 
-comprobarQueNoEsNumero $1
-comprobarQueNoEsNumero $2
+comprobarQueNoEsNumero "$1"
+comprobarQueNoEsNumero "$2"
 
-echo $1 $2 | awk '{ print $1 / $2 }'
+echo "$1" "$2" | awk '{ print $1 / $2 }'

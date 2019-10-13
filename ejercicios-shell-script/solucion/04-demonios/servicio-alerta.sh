@@ -1,5 +1,9 @@
 #! /bin/bash
 
+set -o errexit  # the script ends if a command fails
+set -o pipefail # the script ends if a command fails in a pipe
+set -o nounset  # the script ends if it uses an undeclared variable
+
 # script que arraca, para, relanza y nos muestra el estado de 'alerta'
 
 # función de ayuda
@@ -37,7 +41,7 @@ function do_stop() {
 
     # si exite el fichero
     if [ -e $PIDFILE ]; then
-        kill -9 `cat $PIDFILE`
+        kill -9 "$(cat $PIDFILE)"
         rm $PIDFILE
     fi
     echo "Parado."
@@ -62,7 +66,7 @@ function do_status() {
 }
 
 # si primer parámetro == '-h' o == '--help'
-if [ "$1" == "-h" -o "$1" == "--help" ]; then
+if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
     ayuda
     exit 0
 fi

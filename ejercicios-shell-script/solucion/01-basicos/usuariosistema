@@ -1,5 +1,9 @@
 #! /bin/bash
 
+set -o errexit  # the script ends if a command fails
+set -o pipefail # the script ends if a command fails in a pipe
+set -o nounset  # the script ends if it uses an undeclared variable
+
 # script que retorna 
 #     un SI si el primer parámetro coincide con algún usuario del sistema o
 #     un NO en caso contrario
@@ -28,7 +32,7 @@ if [ $# -ne 1 ]; then
 	exit 1
 fi
 
-ESTA_EN_SISTEMA=`grep -E ^$1: /etc/passwd`
+ESTA_EN_SISTEMA=$(grep -E "^$1: /etc/passwd")
 
 if [ -z "$ESTA_EN_SISTEMA" ]; then
 	echo "NO"

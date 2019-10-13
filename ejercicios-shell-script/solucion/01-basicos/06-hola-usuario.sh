@@ -1,5 +1,9 @@
 #! /bin/bash
 
+set -o errexit  # the script ends if a command fails
+set -o pipefail # the script ends if a command fails in a pipe
+set -o nounset  # the script ends if it uses an undeclared variable
+
 # script que saca un "Hola " + parámetros + "!" por pantalla
 # separando cada parámetro con una coma (,)
 # que verifica que hayamos introducido al menos un parámetro
@@ -36,11 +40,11 @@ PRIMERO=1
 # mientras haya parámetros
 while [ -n "$1" ]; do
 
-	ESTA_CONECTADO=`who | grep $1`
+	ESTA_CONECTADO=$(who | grep "$1")
 
 	if [ -z "$ESTA_CONECTADO" ]; then
 		echo "El usuario $1 no está conectado"
-		ayuda
+		ayuda$
 		exit 2
 	fi
 
@@ -57,4 +61,4 @@ while [ -n "$1" ]; do
 done
 
 # mostramos la salida por pantalla
-echo ${MENSAJE}"!"
+echo "$MENSAJE!"

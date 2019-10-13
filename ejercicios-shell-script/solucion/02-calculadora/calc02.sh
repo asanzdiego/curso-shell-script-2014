@@ -1,5 +1,9 @@
 #! /bin/bash
 
+set -o errexit  # the script ends if a command fails
+set -o pipefail # the script ends if a command fails in a pipe
+set -o nounset  # the script ends if it uses an undeclared variable
+
 # script que realiza operaciones simples (suma resta multiplicacion división)
 # entre dos números
 
@@ -30,9 +34,9 @@ DESCRIPCION_AYUDA
 
 function comprobarQueNoEsNumero() {
 
-	if [ -n "$1" \
-		-a "$1" != "0" \
-		-a "`echo $1 | awk '{ print $1*1 }'`" != "$1" ]; then
+	if [ -n "$1" ] \
+		&& [ "$1" != "0" ] \
+		&& [ "$(echo "$1" | awk '{ print $1*1 }')" != "$1" ]; then
 
 		echo "El parámetro '$1' no es un número"
 		ayuda
@@ -46,13 +50,13 @@ if [ $# -ne 3 ]; then
 	exit 1
 fi
 
-comprobarQueNoEsNumero $1
-comprobarQueNoEsNumero $3
+comprobarQueNoEsNumero "$1"
+comprobarQueNoEsNumero "$3"
 
 case $2 in
-    +|sum|mas)   echo $1 $3 | awk '{ print $1 + $2 }' ;;
-    -|res|menos) echo $1 $3 | awk '{ print $1 - $2 }' ;;
-    x|mul|por)   echo $1 $3 | awk '{ print $1 * $2 }' ;;
-    /|div|entre) echo $1 $3 | awk '{ print $1 / $2 }' ;;
+    +|sum|mas)   echo "$1" "$3" | awk '{ print $1 + $2 }' ;;
+    -|res|menos) echo "$1" "$3" | awk '{ print $1 - $2 }' ;;
+    x|mul|por)   echo "$1" "$3" | awk '{ print $1 * $2 }' ;;
+    /|div|entre) echo "$1" "$3" | awk '{ print $1 / $2 }' ;;
     *) echo "La operación '$2' es inválida." ; ayuda ; exit 3 ;;
 esac

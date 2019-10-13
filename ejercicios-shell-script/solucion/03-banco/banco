@@ -1,6 +1,10 @@
 #! /bin/bash
 
-BANCO_FILE=~/.banco.txt
+set -o errexit  # the script ends if a command fails
+set -o pipefail # the script ends if a command fails in a pipe
+set -o nounset  # the script ends if it uses an undeclared variable
+
+BANCO_FILE="$HOME/.banco.txt"
 
 function help() {
 
@@ -32,43 +36,40 @@ DESCRIPCION_AYUDA
 
 function exitWithError() {
 
-    LINEA_ERROR=$1
-    MENSAJE_ERROR=$2
-    CODIGO_ERROR=$3
+    LINEA_ERROR="$1"
+    MENSAJE_ERROR="$2"
+    CODIGO_ERROR="$3"
 
-	echo "$0: línea $LINEA_ERRO: Error $CODIGO_ERROR: $MENSAJE_ERROR"
-	exit $CODIGO_ERROR
+	echo "$0: línea $LINEA_ERROR: Error $CODIGO_ERROR: $MENSAJE_ERROR"
+	exit "$CODIGO_ERROR"
 }
 
 function testDateExists() {
 
-    DATE=$1
+    DATE="$1"
 
     # si ya existe un movimiento bancario para la misma fecha
-    if [ -n "`grep -E ^$DATE $BANCO_FILE`" ]; then
+    if [ "$(grep -E "^$DATE" "$BANCO_FILE")" != "" ]; then
         exitWithError $LINENO "Ya existe un movimiento bancario para la fecha '$DATE'." 12
     fi
 }
 
 function testIsDate() {
 
-	DATE=$1
+	DATE="$1"
 
-	EXPRESION_CONCUERDA=`echo $DATE | grep -E \
-		^20[0-9]{2}-[01][0-9]-[0-3][0-9]$`
-
-	if [ -z "$EXPRESION_CONCUERDA" ]; then
+	if [ "$(echo "$DATE" | grep -E "^20[0-9]{2}-[01][0-9]-[0-3][0-9]$")" == "" ]; then
 		exitWithError $LINENO "'$DATE' no es una fecha" 4
 	fi
 }
 
-function testIsNubmer() {
+function testIsNumber() {
 
-	NUMBER=$1
+	NUMBER="$1"
 
-	if [ -n "$NUMBER" \
-	-a $NUMBER != "0" \
-	-a "`echo $NUMBER | awk '{ print $1*1 }'`" != "$NUMBER" ]; then
+	if [ -n "$NUMBER" ] \
+		&& [ "$NUMBER" != "0" ] \
+		&& [ "$(echo "$NUMBER" | awk '{ print $1*1 }')" != "$NUMBER" ]; then
 
 		exitWithError $LINENO "'$NUMBER' no es un número" 2
 	fi
@@ -76,57 +77,54 @@ function testIsNubmer() {
 
 function testParameterNumer() {
 
-	PARAMETER_NUMBER=$1
+	PARAMETER_NUMBER="$1"
 	shift
-	if [ $# -ne $PARAMETER_NUMBER ]; then
+	if [ $# -ne "$PARAMETER_NUMBER" ]; then
 		exitWithError $LINENO \
-		"Número de parámetros " \
-		"obligatorio: $PARAMETER_NUMBER" 3
+		"Número de parámetros obligatorio: $PARAMETER_NUMBER" 3
 	fi
 }
 
 function add() {
 
-	testParameterNumer 3 $@
+	testParameterNumer 3 "$@"
 
-	FECHA=$1
-	CONCEPTO=$2
-	CANTIDAD=$3
+	FECHA="$1"
+	CONCEPTO="$2"
+	CANTIDAD="$3"
 
-	testIsDate $FECHA
-	testDateExists $FECHA
-	testIsNubmer $CANTIDAD
+	testIsDate "$FECHA"
+	testDateExists "$FECHA"
+	testIsNumber "$CANTIDAD"
 
-	echo "$FECHA $CONCEPTO $CANTIDAD" >> $BANCO_FILE
+	echo "$FECHA $CONCEPTO $CANTIDAD" >> "$BANCO_FILE"
 }
 
 function search() {
 
-	testParameterNumer 1 $@
+	testParameterNumer 1 "$@"
 
-	PATRON=$1
+	PATRON="$1"
 
-	grep $PATRON $BANCO_FILE
+	grep "$PATRON" "$BANCO_FILE"
 }
 
 # lista movimientos ordenados por fecha
 function list() {
 
-	sort -nk 1 $BANCO_FILE
+	sort -nk 1 "$BANCO_FILE"
 }
 
 function total() {
 
-	awk '{s+=$3} END {print "Total="s}' $BANCO_FILE
+	awk '{s+=$3} END {print "Total="s}' "$BANCO_FILE"
 }
 
 function createFileIfNotExists() {
 
-	touch $BANCO_FILE
-	if [ "$?" != "0" ]; then
+	if ! touch "$BANCO_FILE"; then
 		exitWithError $LINENO \
-		"Error de entrada/salida en" \
-		"el fichero $BANCO_FILE" 5
+		"Error de entrada/salida en el fichero $BANCO_FILE" 5
 	fi
 }
 
@@ -134,8 +132,8 @@ function menu() {
 
 	case $1 in
 		-h|--help)		help;;
-		-a|--add)	    shift; 	add $@;;
-		-s|--search)	shift;	search $@;;
+		-a|--add)	    shift; 	add "$@";;
+		-s|--search)	shift;	search "$@";;
 		-l|--list)		list;;
 		-t|--total)		total;;
 		*) exitWithError $LINENO "Opción '$1' inválida." 1
@@ -145,7 +143,7 @@ function menu() {
 function init() {
 
 	createFileIfNotExists
-	menu $@
+	menu "$@"
 }
 
-init $@
+init "$@"
