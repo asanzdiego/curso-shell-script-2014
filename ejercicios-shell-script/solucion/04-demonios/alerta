@@ -12,8 +12,10 @@ function ayuda() {
 cat << DESCRIPCION_AYUDA
 SYNOPIS
     $0 [SEGUNDOS]
+
 DESCRIPCION
     Escribe la fecha cada X segundos en el log '~/alerta.log'
+
 CODIGOS DE RETORNO
     0 Si no hay ningún error
 DESCRIPCION_AYUDA

@@ -14,10 +14,13 @@ function ayuda() {
 cat << DESCRIPCION_AYUDA
 SYNOPIS
     $0 [OPCIONES]
+
 DESCRIPCIÓN
     Añade y busca y opera con movimientos bancarios.
+
 OPCIONES
     -h --help   Muesta esta ayuda.
+
 CODIGOS DE RETORNO
      0 Si no hay ningún error.
 DESCRIPCION_AYUDA
@@ -31,10 +34,10 @@ cat << DESCRIPCION_MENU
 | MENU DEL BANCO                                                  |
 +-----------------------------------------------------------------+
 | a - Añadir un movimiento bancario.                              |
-| s - Buscar un movimiento bancario.                              |
+| b - Buscar un movimiento bancario.                              |
 | l - Listar todos los movimientos bancarios ordenados por fecha. |
 | t - Calcular el saldo total de la cuenta.                       |
-| e - Salir del programa.                                         |
+| s - Salir del programa.                                         |
 +-----------------------------------------------------------------+
 
 DESCRIPCION_MENU
@@ -101,16 +104,22 @@ function elegir_menu() {
         a) add ;;
         b) search ;;
         l) list ;;
-        c) total ;;
+        t) total ;;
         s) salir ;;
         *) opcion_invalida "$OPCION";;
     esac
 }
 
-# si primer parámetro == '-h' o == '--help'
-if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
-    ayuda
-    exit 0
+parametros() {
+    # si primer parámetro == '-h' o == '--help'
+    if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+        ayuda
+        exit 0
+    fi
+}
+
+if [ $# -gt 0 ]; then
+    parametros "$1"
 fi
 
 clear

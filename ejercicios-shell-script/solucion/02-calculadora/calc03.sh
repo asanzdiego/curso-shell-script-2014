@@ -11,8 +11,10 @@ function ayuda() {
 cat << DESCRIPCION_AYUDA
 SYNOPIS
     $0 EXPRESIÓN_NUMÉRICA
+
 DESCRIPCIÓN
     Muestra por pantalla el valor de EXPRESIÓN_NUMÉRICA.
+
 CODIGOS DE RETORNO
     0 Si no hay ningún error.
     1 Si el número de parámetros es distinto de 1.
@@ -31,15 +33,15 @@ function error() {
     exit "$3"
 }
 
+# si número de parámetros distinto 1
+if [ $# -ne 1 ] ; then
+    error $LINENO "Hay que introducir 1 y solamente 1 parámetro." 1
+fi
+
 # si primer parámetro == '-h' o == '--help'
 if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
     ayuda
     exit 0
-fi
-
-# si número de parámetros distinto 1
-if [ $# -ne 1 ] ; then
-    error $LINENO "Hay que introducir 1 y solamente 1 parámetro." 1
 fi
 
 # si el parámetro no concuerda con la expresión regular

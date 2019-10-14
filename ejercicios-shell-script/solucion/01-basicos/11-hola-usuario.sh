@@ -15,14 +15,14 @@ function ayuda() {
 
 cat << DESCRPCION_AYUDA
 SYNOPSIS
-	$0 NOMBRE_1 [NOMBRE_2] ... [NOMBRE_N]
+    $0 NOMBRE_1 [NOMBRE_2] ... [NOMBRE_N]
 
 DESCRIPCION
    Muestra "Hola NOMBRE_1, NOMBRE_2, ... NOMBRE_N!" por pantalla.
 
 CÓDIGOS DE RETORNO
-	1 Si el número de parámetros es menor que 1
-	2 Si el usuario no está en el sistema
+    1 Si el número de parámetros es menor que 1
+    2 Si el usuario no está en el sistema
 DESCRPCION_AYUDA
 
 }
@@ -37,28 +37,23 @@ fi
 MENSAJE="Hola"
 PRIMERO=1
 
-# mientras haya parámetros
-while [ -n "$1" ]; do
+# iteramos sobre los parámetros
+for i in "$@"; do
 
-	ESTA_USUARIO=$(./usuariosistema "$1")
+    if [ "$(./usuariosistema "$i")" == "NO" ]; then
+        echo "El usuario '$i' no está en el sistema"
+        ayuda
+        exit 2
+    fi
 
-	if [ "$ESTA_USUARIO" == "NO" ]; then
-		echo "El usuario $1 no está en el sistema"
-		ayuda
-		exit 2
-	fi
+    if [ $PRIMERO -eq 1 ]; then
+        MENSAJE="$MENSAJE $i"
+        PRIMERO=0
+    else
+        MENSAJE="$MENSAJE, $i"
+    fi
 
-	if [ $PRIMERO -eq 1 ]; then
-
-		MENSAJE="$MENSAJE $1"
-		PRIMERO=0
-	else
-		MENSAJE="$MENSAJE, $1"
-	fi
-
-	# pasamos al siguiente parámetro
-	shift
 done
 
 # mostramos la salida por pantalla
-echo "${MENSAJE}!"
+echo "$MENSAJE!"

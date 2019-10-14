@@ -36,20 +36,20 @@ DIRECTORIO_A_COPIAR="$HOME/directorio_a_copiar"
 
 # si no exixte el directorio a copiar mostramos un error y paramos la ejecución
 if [ ! -d "$DIRECTORIO_A_COPIAR" ]; then
-	echo "No exixte el directorio a copiar."
-	exit 1
+    echo "No exixte el directorio a copiar."
+    exit 1
 fi
 
 # si no existe el FICHERO_ULTIMA_COPIA_TOTAL mostramos un error
 # y paramos la ejecución
 if [ ! -e "$FICHERO_ULTIMA_COPIA_TOTAL" ]; then
-	echo "No hay última copia total."
-	exit 1
+    echo "No hay última copia total."
+    exit 1
 fi
 
 # si no exixte el directorio de los ficheros lo creamos
 if [ ! -d "$RUTA_FICHEROS" ]; then
-	mkdirs "$RUTA_FICHEROS"
+    mkdirs "$RUTA_FICHEROS"
 fi
 
 # empaquetamos y comprimimos los ficheros modificados

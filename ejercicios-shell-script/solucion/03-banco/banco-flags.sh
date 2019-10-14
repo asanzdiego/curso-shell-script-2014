@@ -13,25 +13,26 @@ BANCO_SCRIPT=./banco
 function ayuda() {
 cat << DESCRIPCION_AYUDA
 SYNOPIS
-    $0  [OPCIÓN] [PARÁMETROS]
+    $0 [OPCIÓN] [PARÁMETROS]
 
 DESCRIPCIÓN
     Añade, busca, lista y opera con movimientos bancarios.
 
 OPCIONES
-	-h --help                           Muestra una ayuda.
-	-a --add    FECHA CONCEPTO CANTIDAD Añade un movimiento bancario.
-	-s --search PATRÓN                  Busca un movimiento bancario.
-	-l --list                           Lista los movimientos bancarios ordenados por fecha.
-	-t --total                          Calcula el saldo total de la cuenta.
+    -h --help                           Muestra una ayuda.
+    -a --add    FECHA CONCEPTO CANTIDAD Añade un movimiento bancario.
+    -s --search PATRÓN                  Busca un movimiento bancario.
+    -l --list                           Lista los movimientos bancarios ordenados por fecha.
+    -t --total                          Calcula el saldo total de la cuenta.
 
 CÓDIGOS DE RETORNO
-	0 Si no hay ningún error.
-	1 SI la opción introducida no es válida.
-	2 si un argumento númerico no es un número.
-	3 Si el número de parámetros es erróneo.
-	4 si un argumento de tipo fecha no es una fecha.
-	5 Si hay un error de entrada/salida en $BANCO_FILE.
+    0 Si no hay ningún error.
+    1 Si la opción introducida no es válida.
+    2 Si un argumento númerico no es un número.
+    3 Si el número de parámetros es erróneo.
+    4 Si un argumento de tipo fecha no es una fecha.
+    5 Si hay un error de entrada/salida en el fichero de datos.
+    6 Si no introducen ningún parámetro.
 DESCRIPCION_AYUDA
 }
 
@@ -69,6 +70,13 @@ function opcion_invalida() {
     echo "Opción '$1' inválida."
     exit 6
 }
+
+# si número de parámetros menor o igual que 0
+if [ $# -le 0 ]; then
+  echo "Hay que introducir al menos un parámetro."
+  ayuda
+  exit 6
+fi
 
 while getopts "ha:s:lt" option ; do 
     case "$option" in 

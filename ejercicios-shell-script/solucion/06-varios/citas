@@ -18,296 +18,297 @@ CITAS_FILE=~/citas.txt
 function ayuda() {
 cat << DESCRIPCION_AYUDA
 SYNOPIS
-	$0 [OPCIONES] [HORA_INICIAL] [HORA_FINAL] [NOMBRE_PACIENTE]
+    $0 [OPCIONES] [HORA_INICIAL] [HORA_FINAL] [NOMBRE_PACIENTE]
 
 DESCRIPCIÓN
-	Añade y busca citas de una consulta.
+    Añade y busca citas de una consulta.
 
 OPCIONES
-	-h --help   Para mostrar un texto de ayuda.
-	-a --add    Para añadir una cita con HORA_INICIAL, HORA_FINAL, y NOMBRE_PACIENTE.
-	-s --search Para buscar los pacientes que contengan PATRÓN.
-	-i --init   Para buscar las citas que empiecen a HORA_INICIAL.
-	-e --end    Para buscar las citas que terminen a HORA_FINAL.
-	-n --name   Para listar todas las citas ordenadas por NOMBRE_PACIENTE.
-	-o --hour   Para listar todas las citas ordenadas por HORA_INICIAL.
+    -h --help   Para mostrar un texto de ayuda.
+    -a --add    Para añadir una cita con HORA_INICIAL, HORA_FINAL, y NOMBRE_PACIENTE.
+    -s --search Para buscar los pacientes que contengan PATRÓN.
+    -i --init   Para buscar las citas que empiecen a HORA_INICIAL.
+    -e --end    Para buscar las citas que terminen a HORA_FINAL.
+    -n --name   Para listar todas las citas ordenadas por NOMBRE_PACIENTE.
+    -o --hour   Para listar todas las citas ordenadas por HORA_INICIAL.
 
 CÓDIGOS DE RETORNO
-	0 Si no hay ningún error.
-	1 Si el número de parámetros es incorrecto.
-	2 Si el formato de los parámetros es incorrecto.
-	3 Si al añadir una cita se solapa con otra ya introducida.
-	4 Si al añadir una cita ya existe NOMBRE_PACIENTE.
-	5 Si se introduce una opción inválida.
-	6 Si ocurre otro error no mencionado.
+    0 Si no hay ningún error.
+    1 Si el número de parámetros es incorrecto.
+    2 Si el formato de los parámetros es incorrecto.
+    3 Si al añadir una cita se solapa con otra ya introducida.
+    4 Si al añadir una cita ya existe NOMBRE_PACIENTE.
+    5 Si se introduce una opción inválida.
+    6 Si ocurre otro error no mencionado.
 DESCRIPCION_AYUDA
 }
 
 # función de error
-#	$1 línea de error
-#	$2 mensaje de error
-#	$3 código de retorno 
+#    $1 línea de error
+#    $2 mensaje de error
+#    $3 código de retorno 
 function error() {
 
-	# muetra un mensaje de error
-	echo "$0: Línea $1: Error $3: $2"
+    # muetra un mensaje de error
+    echo "$0: Línea $1: Error $3: $2"
 
-	# termina la ejecución del script con el codigo de retorno indicado
-	exit "$3"
+    # termina la ejecución del script con el codigo de retorno indicado
+    exit "$3"
 }
 
 # función que comprueba el número de parámetros introducido
-#	$1 linea error
-#	$2 número de parámetros esperados
-#	"$@" parámetros
+#    $1 linea error
+#    $2 número de parámetros esperados
+#    "$@" parámetros
 function numero_parametros() {
 
-	# líenea error
-	LINEA_ERROR="$1"
+    # líenea error
+    LINEA_ERROR="$1"
 
-	# eliminamos el primer parámetro
-	shift
+    # eliminamos el primer parámetro
+    shift
 
-	# número de parámetros esperados
-	NUMERO_PARAMETROS_ESPERADOS="$1"
+    # número de parámetros esperados
+    NUMERO_PARAMETROS_ESPERADOS="$1"
 
-	# volvemos a eliminar el primer parámetro
-	shift
+    # volvemos a eliminar el primer parámetro
+    shift
 
-	# número de parámetros que nos queda
-	NUMERO_PARAMETROS_REALES="$#"
+    # número de parámetros que nos queda
+    NUMERO_PARAMETROS_REALES="$#"
 
-	# si el número de parámetros introducido es distinto del esperado
-	if [ "$NUMERO_PARAMETROS_REALES" != "$NUMERO_PARAMETROS_ESPERADOS" ]; then
+    # si el número de parámetros introducido es distinto del esperado
+    if [ "$NUMERO_PARAMETROS_REALES" != "$NUMERO_PARAMETROS_ESPERADOS" ]; then
 
-		error "$LINEA_ERROR" "Número de parámetros '$NUMERO_PARAMETROS_REALES' distinto de '$NUMERO_PARAMETROS_ESPERADOS'." 1
-	fi
+        error "$LINEA_ERROR" "Número de parámetros '$NUMERO_PARAMETROS_REALES' distinto de '$NUMERO_PARAMETROS_ESPERADOS'." 1
+    fi
 }
 
 # función que comprueba que el formato de la hora es correcto
-#	$1 línea de error
-#	$2 hora
+#    $1 línea de error
+#    $2 hora
 function formato_hora() {
 
-	# líenea error
-	LINEA_ERROR="$1"
+    # líenea error
+    LINEA_ERROR="$1"
 
-	# recogemos la hora
-	HORA="$2"
+    # recogemos la hora
+    HORA="$2"
 
-	# si la hora introducida no es un número de 2 cifras
-	if [ -z "$(echo "$HORA" | grep -E "^[0-9]{2}$")" ]; then
+    # si la hora introducida no es un número de 2 cifras
+    if [ "$(echo "$HORA" | grep -E "^[0-9]{2}$" || echo 'NO')" == "NO" ]; then
 
-		error "$LINEA_ERROR" "La hora '$HORA' no es un número de 2 cifras." 2
-	fi
+        error "$LINEA_ERROR" "La hora '$HORA' no es un número de 2 cifras." 2
+    fi
 
-	# si la hora no está comprendida entre 00 y 23
-	if [ "$HORA" -gt 23 ]; then
+    # si la hora no está comprendida entre 00 y 23
+    if [ "$HORA" -gt 23 ]; then
 
-		error "$LINEA_ERROR" "La hora '$HORA' no está comprendida entre 00 y 23" 2
-	fi
+        error "$LINEA_ERROR" "La hora '$HORA' no está comprendida entre 00 y 23" 2
+    fi
 }
 
 # función que comprueba que la hora inicial no se solapa con alguna cita ya introducida
-#	$1 línea de error
-#	$2 hora inicial
+#    $1 línea de error
+#    $2 hora inicial
 function solape_hora_inicial() {
 
-	# líenea error
-	LINEA_ERROR="$1"
+    # líenea error
+    LINEA_ERROR="$1"
 
-	# recogemos la hora inicial
-	HORA_INICIAL="$2"
+    # recogemos la hora inicial
+    HORA_INICIAL="$2"
 
-	# fichero con el programa awk
-	FICHERO_PROGRAMA_AWK="$HOME/awk-program.txt"
+    # fichero con el programa awk
+    FICHERO_PROGRAMA_AWK="$HOME/awk-program.txt"
 
-	# sentencia awk para buscar si ya existe una cita que se solape
-	echo "{ if ( $HORA_INICIAL >= \$1 && $HORA_INICIAL < \$2 ) print \$0 }" > "$FICHERO_PROGRAMA_AWK"
+    # sentencia awk para buscar si ya existe una cita que se solape
+    echo "{ if ( $HORA_INICIAL >= \$1 && $HORA_INICIAL < \$2 ) print \$0 }" > "$FICHERO_PROGRAMA_AWK"
 
-	# ejecutamos el comando y guardamos el resultado en una variable
-	CITA_SOLAPADA=$(more "$CITAS_FILE" | awk -f "$FICHERO_PROGRAMA_AWK")
+    # ejecutamos el comando y guardamos el resultado en una variable
+    CITA_SOLAPADA=$(more "$CITAS_FILE" | awk -f "$FICHERO_PROGRAMA_AWK")
 
-	# si existe alguna cita que se solape
-	if [ -n "$CITA_SOLAPADA" ]; then
+    # si existe alguna cita que se solape
+    if [ -n "$CITA_SOLAPADA" ]; then
 
-		error "$LINEA_ERROR" "La hora inicial '$HORA_INICIAL' se solapa con la cita '$CITA_SOLAPADA'." 3
-	fi
+        error "$LINEA_ERROR" "La hora inicial '$HORA_INICIAL' se solapa con la cita '$CITA_SOLAPADA'." 3
+    fi
 }
 
 # función que comprueba que la hora final no se solapa con alguna cita ya introducida
-#	$1 línea de error
-#	$2 hora final
+#    $1 línea de error
+#    $2 hora final
 function solape_hora_final() {
 
-	# líenea error
-	LINEA_ERROR="$1"
+    # líenea error
+    LINEA_ERROR="$1"
 
-	# recogemos la hora final
-	HORA_FINAL="$2"
+    # recogemos la hora final
+    HORA_FINAL="$2"
 
-	# fichero con el programa awk
-	FICHERO_PROGRAMA_AWK="$HOME/awk-program.txt"
+    # fichero con el programa awk
+    FICHERO_PROGRAMA_AWK="$HOME/awk-program.txt"
 
-	# sentencia awk para buscar si ya existe una cita que se solape
-	echo "{ if ( $HORA_FINAL > \$1 && $HORA_FINAL <= \$2 ) print \$0 }" > "$FICHERO_PROGRAMA_AWK"
+    # sentencia awk para buscar si ya existe una cita que se solape
+    echo "{ if ( $HORA_FINAL > \$1 && $HORA_FINAL <= \$2 ) print \$0 }" > "$FICHERO_PROGRAMA_AWK"
 
-	# ejecutamos el comando y guardamos el resultado en una variable
-	CITA_SOLAPADA=$(more "$CITAS_FILE" | awk -f "$FICHERO_PROGRAMA_AWK")
+    # ejecutamos el comando y guardamos el resultado en una variable
+    CITA_SOLAPADA=$(more "$CITAS_FILE" | awk -f "$FICHERO_PROGRAMA_AWK")
 
-	# si existe alguna cita que se solape
-	if [ -n "$CITA_SOLAPADA" ]; then
+    # si existe alguna cita que se solape
+    if [ -n "$CITA_SOLAPADA" ]; then
 
-		error "$LINEA_ERROR" "La hora final '$HORA_FINAL' se solapa con la cita '$CITA_SOLAPADA'." 3
-	fi
+        error "$LINEA_ERROR" "La hora final '$HORA_FINAL' se solapa con la cita '$CITA_SOLAPADA'." 3
+    fi
 }
 
 # función que comprueba que no exista ya un nombre de paciente
-#	$1 línea de error
-#	$2 nombre del paciente a comprobar
+#    $1 línea de error
+#    $2 nombre del paciente a comprobar
 function nombre_paciente() {
 
-	# líenea error
-	LINEA_ERROR="$1"
+    # líenea error
+    LINEA_ERROR="$1"
 
-	# recogemos el nombre del paciente
-	NOMBRE_PACIENTE="$2"
+    # recogemos el nombre del paciente
+    NOMBRE_PACIENTE="$2"
 
-	# si el nombre ya está en el fichero de citas
-	if [ -n "$(grep "$NOMBRE_PACIENTE" "$CITAS_FILE")" ]; then
+    # si el nombre ya está en el fichero de citas
+    if [ "$(grep "$NOMBRE_PACIENTE" "$CITAS_FILE" && echo 'SI')" == "SI" ]; then
 
-		error "$LINEA_ERROR" "Nombre del paciente '$NOMBRE_PACIENTE' repetido." 4
-	fi
+        error "$LINEA_ERROR" "Nombre del paciente '$NOMBRE_PACIENTE' repetido." 4
+    fi
 }
 
 # función que comprueba si ha habido algún error inexperado
-#	$1 línea de error
+#    $1 línea de error
 function error_inexperado() {
 
-	# líenea error
-	LINEA_ERROR="$1"
+    # líenea error
+    LINEA_ERROR="$1"
 
-	# si ocurre algún error inexperado
-	if [ "$?" != "0" ]; then
+    # si ocurre algún error inexperado
+    # shellcheck disable=SC2181
+    if [ "$?" != "0" ]; then
 
-		error "$LINEA_ERROR" "Error inexperado." 6
-	fi
+        error "$LINEA_ERROR" "Error inexperado." 6
+    fi
 }
 
 # función para añadir una cita
-#	$1 hora incio cita
-#	$2 hora final cita
-#	$3 nombre del paciente
+#    $1 hora incio cita
+#    $2 hora final cita
+#    $3 nombre del paciente
 function add() {
 
-	# comprobamos que el número de parámetros sea igual a 3
-	numero_parametros $LINENO 3 "$@"
+    # comprobamos que el número de parámetros sea igual a 3
+    numero_parametros $LINENO 3 "$@"
 
-	# inicializamos las variables con los valores de los parámetros introducidos
-	HORA_INICIAL="$1"
-	HORA_FINAL="$2"
-	NOMBRE_PACIENTE=$3
+    # inicializamos las variables con los valores de los parámetros introducidos
+    HORA_INICIAL="$1"
+    HORA_FINAL="$2"
+    NOMBRE_PACIENTE=$3
 
-	# comprobamos que el formato de la hora inicial sea el correcto
-	formato_hora $LINENO "$HORA_INICIAL"
+    # comprobamos que el formato de la hora inicial sea el correcto
+    formato_hora $LINENO "$HORA_INICIAL"
 
-	# comprobamos que la hora inicial no se solape con alguna cita ya introducida
-	solape_hora_inicial $LINENO "$HORA_INICIAL"
+    # comprobamos que la hora inicial no se solape con alguna cita ya introducida
+    solape_hora_inicial $LINENO "$HORA_INICIAL"
 
-	# comprobamos que el formato de la hora final sea el correcto
-	formato_hora $LINENO "$HORA_FINAL"
+    # comprobamos que el formato de la hora final sea el correcto
+    formato_hora $LINENO "$HORA_FINAL"
 
-	# comprobamos que la hora final no se solape con alguna cita ya introducida
-	solape_hora_final $LINENO "$HORA_FINAL"
+    # comprobamos que la hora final no se solape con alguna cita ya introducida
+    solape_hora_final $LINENO "$HORA_FINAL"
 
-	# comprobamos que no exista ya el nombre del paciente
-	nombre_paciente $LINENO "$NOMBRE_PACIENTE"
+    # comprobamos que no exista ya el nombre del paciente
+    nombre_paciente $LINENO "$NOMBRE_PACIENTE"
 
-	# grabamos al final del fichero
-	echo "$HORA_INICIAL" "$HORA_FINAL" "$NOMBRE_PACIENTE" >> "$CITAS_FILE"
+    # grabamos al final del fichero
+    echo "$HORA_INICIAL" "$HORA_FINAL" "$NOMBRE_PACIENTE" >> "$CITAS_FILE"
 
-	# comprobamos que no haya habido ningún error inexperado
-	error_inexperado $LINENO
+    # comprobamos que no haya habido ningún error inexperado
+    error_inexperado $LINENO
 }
 
 # función de búsqueda por NOMBRE_PACIENTE
 #    $1 patrón de búsqueda
 function search() {
 
-	# comprobamos que el número de parámetros sea igual a 1
-	numero_parametros $LINENO 1 "$@"
+    # comprobamos que el número de parámetros sea igual a 1
+    numero_parametros $LINENO 1 "$@"
 
-	PATRON="$1"
+    PATRON="$1"
 
-	# buscamos el patrón introducido en el fichero de las citas
-	grep "$PATRON" "$CITAS_FILE"
+    # buscamos el patrón introducido en el fichero de las citas
+    grep "$PATRON" "$CITAS_FILE"
 
-	# comprobamos que no haya habido ningún error inexperado
-	error_inexperado $LINENO
+    # comprobamos que no haya habido ningún error inexperado
+    error_inexperado $LINENO
 }
 
 # función de búsqueda por HORA_INICIAL
 #    $1 hora inicial
 function init() {
 
-	# comprobamos que el número de parámetros sea igual a 1
-	numero_parametros $LINENO 1 "$@"
+    # comprobamos que el número de parámetros sea igual a 1
+    numero_parametros $LINENO 1 "$@"
 
-	HORA_INICIAL="$1"
+    HORA_INICIAL="$1"
 
-	# comprobamos que el formato de la hora inicial sea el correcto
-	formato_hora $LINENO "$HORA_INICIAL"
+    # comprobamos que el formato de la hora inicial sea el correcto
+    formato_hora $LINENO "$HORA_INICIAL"
 
-	# buscamos la hora inicial en el fichero de las citas
-	grep -E "^$HORA_INICIAL.*$" $CITAS_FILE
+    # buscamos la hora inicial en el fichero de las citas
+    grep -E "^$HORA_INICIAL.*$" $CITAS_FILE
 
-	# comprobamos que no haya habido ningún error inexperado
-	error_inexperado $LINENO
+    # comprobamos que no haya habido ningún error inexperado
+    error_inexperado $LINENO
 }
 
 # función de búsqueda por HORA_FINAL
 #    $1 hora final
 function end() {
 
-	# comprobamos que el número de parámetros sea igual a 1
-	numero_parametros $LINENO 1 "$@"
+    # comprobamos que el número de parámetros sea igual a 1
+    numero_parametros $LINENO 1 "$@"
 
-	HORA_FINAL="$1"
+    HORA_FINAL="$1"
 
-	# comprobamos que el formato de la hora final sea el correcto
-	formato_hora "$LINENO" "$HORA_FINAL"
+    # comprobamos que el formato de la hora final sea el correcto
+    formato_hora "$LINENO" "$HORA_FINAL"
 
-	# buscamos la hora final en el fichero de las citas
-	grep -E "^...$HORA_FINAL.*$" "$CITAS_FILE"
+    # buscamos la hora final en el fichero de las citas
+    grep -E "^...$HORA_FINAL.*$" "$CITAS_FILE"
 
-	# comprobamos que no haya habido ningún error inexperado
-	error_inexperado $LINENO
+    # comprobamos que no haya habido ningún error inexperado
+    error_inexperado $LINENO
 }
 
 # función de listado ordenados por NOMBRE_PACIENTE
 function name() {
 
-	# comprobamos que el número de parámetros sea igual a 0
-	numero_parametros $LINENO 0 "$@"
+    # comprobamos que el número de parámetros sea igual a 0
+    numero_parametros $LINENO 0 "$@"
 
-	# ordenamos el fichero de las citas por la tercera columna
-	sort -k 3 $CITAS_FILE
+    # ordenamos el fichero de las citas por la tercera columna
+    sort -k 3 $CITAS_FILE
 
-	# comprobamos que no haya habido ningún error inexperado
-	error_inexperado $LINENO
+    # comprobamos que no haya habido ningún error inexperado
+    error_inexperado $LINENO
 }
 
 # función de listado ordenados por HORA_INICIAL
 function hour() {
 
-	# comprobamos que el número de parámetros sea igual a 0
-	numero_parametros $LINENO 0 "$@"
+    # comprobamos que el número de parámetros sea igual a 0
+    numero_parametros $LINENO 0 "$@"
 
-	# ordenamos el fichero de las citas por la primera columna en formato numérico
-	sort -nk 1 $CITAS_FILE
+    # ordenamos el fichero de las citas por la primera columna en formato numérico
+    sort -nk 1 $CITAS_FILE
 
-	# comprobamos que no haya habido ningún error inexperado
-	error_inexperado $LINENO
+    # comprobamos que no haya habido ningún error inexperado
+    error_inexperado $LINENO
 }
 
 # vemos si tenemos acceso al fichero de las citas
@@ -324,12 +325,12 @@ shift
 
 # dependiendo de la opción seleccionada
 case $OPCION in
-	-h|--help)	    ayuda;;
-	-a|--add)	    add "$@";;
-	-s|--search)	search "$@";;
-	-i|--init)	    init "$@";;
-	-e|--end)	    end "$@";;
-	-n|--name)	    name "$@";;
-	-o|--hour)	    hour "$@";;
-	*)		        error $LINENO "Opción '$OPCION' inválida." 5;;
+    -h|--help)        ayuda;;
+    -a|--add)        add "$@";;
+    -s|--search)    search "$@";;
+    -i|--init)        init "$@";;
+    -e|--end)        end "$@";;
+    -n|--name)        name "$@";;
+    -o|--hour)        hour "$@";;
+    *)                error $LINENO "Opción '$OPCION' inválida." 5;;
 esac

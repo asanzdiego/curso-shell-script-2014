@@ -7,6 +7,7 @@ set -o nounset  # the script ends if it uses an undeclared variable
 ROLES_FILE=./roles.csv
 
 ROLES=$(cut -d : -f 2 $ROLES_FILE | sed 's/,/\n/g' | sort | uniq)
+        shift # pasamos al siguiente parámetro
 
 for ROL in $ROLES; do
 

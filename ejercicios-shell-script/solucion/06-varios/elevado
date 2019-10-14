@@ -6,20 +6,20 @@ set -o nounset  # the script ends if it uses an undeclared variable
 
 # si el número de parámetros es distinto de 2
 if [ $# -ne 2 ]; then
-	echo "Para ejecutar este script se necesitan 2 números."
-	exit 2
+    echo "Para ejecutar este script se necesitan 2 números."
+    exit 2
 fi
 
 #inicializamos variables
 ELEVADO=1
-BASE=$1
-EXPONENTE=$2
+BASE="$1"
+EXPONENTE="$2"
 
 # para cada parámetro introducido
-for ((CONTADOR=0; CONTADOR<$EXPONENTE; CONTADOR++)); do
+for ((CONTADOR=0; CONTADOR<"$EXPONENTE"; CONTADOR++)); do
 
-  ELEVADO=`echo $ELEVADO $BASE | awk '{ print $1*$2 }'`
+  ELEVADO=$(echo "$ELEVADO" "$BASE" | awk '{ print $1*$2 }')
 
 done
 
-echo $ELEVADO
+echo "$ELEVADO"
