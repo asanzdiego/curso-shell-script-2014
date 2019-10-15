@@ -65,13 +65,16 @@ function do_status() {
     fi
 }
 
-# si primer parámetro == '-h' o == '--help'
-if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+# si número de parámetros distinto 3
+if [ $# -ne 1 ]; then
+    echo "El número de parámetros debe de ser igual a 1"
     ayuda
-    exit 0
+    exit 1
 fi
 
 case $1 in
+    -h|--help)
+        ayuda ;;
     start)
       do_start ;;
     stop)

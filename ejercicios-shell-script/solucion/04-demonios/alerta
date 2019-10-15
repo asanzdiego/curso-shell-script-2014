@@ -21,15 +21,22 @@ CODIGOS DE RETORNO
 DESCRIPCION_AYUDA
 }
 
-# si primer parámetro == '-h' o == '--help'
-if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
-    ayuda
-    exit 0
+DEFAULT=2
+SEGUNDOS=$DEFAULT
+
+if [ "$#" -gt 0 ]; then
+
+    # si primer parámetro == '-h' o == '--help'
+    if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+        ayuda
+        exit 0
+    fi
+
+    SEGUNDOS=$1
 fi
 
-function main() {
 
-    DEFAULT=2
+function main() {
 
     # comprobar que SEGUNDOS es un número
     if [ "$SEGUNDOS" != "0" ] && [ "$(echo "$SEGUNDOS" | awk '{ print $1 * 1 }')" != "$SEGUNDOS" ]; then
@@ -48,4 +55,4 @@ function main() {
 
 echo "$$"
 
-main "$1"
+main "$@"

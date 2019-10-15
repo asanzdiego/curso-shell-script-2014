@@ -18,6 +18,9 @@ FECHA="$(date +%Y.%m.%d-%H.%M.%S)"
 # variable con la ruta de los ficheros
 RUTA_FICHEROS="$HOME/copia_seguridad"
 
+# variable con el fichero con la fecha de la última copia total
+FICHERO_ULTIMA_COPIA_TOTAL="$RUTA_FICHEROS/fecha-ultima-copia-total.txt"
+
 # variable con el fichero con la fecha de la última copia incremental
 FICHERO_ULTIMA_COPIA_INCREMENTAL="$RUTA_FICHEROS/fecha-ultima-copia-incremental.txt"
 
@@ -38,11 +41,19 @@ if [ ! -d "$DIRECTORIO_A_COPIAR" ]; then
     exit 1
 fi
 
-# si no existe el FICHERO_ULTIMA_COPIA_INCREMENTAL mostramos un error
+# si no existe el FICHERO_ULTIMA_COPIA_INCREMENTAL
+# vemos si existe el fichero FICHERO_ULTIMA_COPIA_TOTAL
+# si no existe ninguno mostramos un error
 # y paramos la ejecución
 if [ ! -e "$FICHERO_ULTIMA_COPIA_INCREMENTAL" ]; then
-    echo "No hay última copia incremental."
-    exit 1
+    if [ ! -e "$FICHERO_ULTIMA_COPIA_TOTAL" ]; then
+        echo "No hay última copia incremental ni total."
+        exit 1
+    else
+        FICHERO_FLAG=$FICHERO_ULTIMA_COPIA_TOTAL
+    fi
+else
+    FICHERO_FLAG=$FICHERO_ULTIMA_COPIA_INCREMENTAL
 fi
 
 # si no exixte el directorio de los ficheros lo creamos
@@ -52,7 +63,7 @@ fi
 
 # empaqueta y comprime los ficheros modificados
 # desde la última copia incremental
-find "$DIRECTORIO_A_COPIAR"/*.txt -newer "$FICHERO_ULTIMA_INCREMENTAL" | zip -@ "$FICHERO_COMPRIMIDO"
+find "$DIRECTORIO_A_COPIAR"/* -newer "$FICHERO_FLAG" | zip -@ "$FICHERO_COMPRIMIDO"
 
 # guardar la fecha de la última copia incremental
 # en FICHERO_ULTIMA_COPIA_INCREMENTAL
