@@ -10,7 +10,7 @@ set -o nounset  # the script ends if it uses an undeclared variable
 BANCO_SCRIPT=./banco
 
 # función de ayuda
-function ayuda() {
+function help() {
 cat << DESCRIPCION_AYUDA
 SYNOPIS
     $0 [OPCIÓN] [PARÁMETROS]
@@ -36,7 +36,6 @@ CÓDIGOS DE RETORNO
 DESCRIPCION_AYUDA
 }
 
-
 # función para añadir un movimiento bancario
 function add() {
     echo "AÑADIR UN MOVIMIENTO BANCARIO"
@@ -46,8 +45,8 @@ function add() {
 
 # función para búscar un movimiento bancario
 function search() {
-    echo "BUSCAR MOVIMIENTO BANCARIO ($1)"
-    $BANCO_SCRIPT --search "$1"
+    echo "BUSCAR MOVIMIENTO BANCARIO ($*)"
+    $BANCO_SCRIPT --search "$@"
     echo "-----------------------------"
 }
 
@@ -73,18 +72,16 @@ function opcion_invalida() {
 
 # si número de parámetros menor o igual que 0
 if [ $# -le 0 ]; then
-  echo "Hay que introducir al menos un parámetro."
-  ayuda
-  exit 6
+    echo "Hay que introducir al menos un parámetro."
+    help
+    exit 6
 fi
 
-while getopts "ha:s:lt" option ; do 
-    case "$option" in 
-        h) ayuda ;;
-        a) add "$OPTARG" ;;
-        s) search "$OPTARG" ;;
-        l) list ;;
-        t) total ;;
-        *) opcion_invalida "$option" ;;
-    esac
-done
+case $1 in
+    -h|--help)                  help;;
+    -a|--add)    shift;     add "$@";;
+    -s|--search) shift;  search "$@";;
+    -l|--list)                  list;;
+    -t|--total)                total;;
+    *) exitWithError $LINENO "Opción '$1' inválida." 1
+esac

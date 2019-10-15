@@ -33,7 +33,6 @@ DESCRIPCION_AYUDA
 
 }
 
-
 function exitWithError() {
 
     LINEA_ERROR="$1"
@@ -71,7 +70,7 @@ function testIsNumber() {
         && [ "$NUMBER" != "0" ] \
         && [ "$(echo "$NUMBER" | awk '{ print $1*1 }')" != "$NUMBER" ]; then
 
-        exitWithError $LINENO "'$NUMBER' no es un número" 2
+        exitWithError $LINENO "'$NUMBER' no es un número" 2      
     fi
 }
 
@@ -86,7 +85,7 @@ function testParameterNumer() {
 }
 
 function add() {
-
+echo "$@"
     testParameterNumer 3 "$@"
 
     FECHA="$1"
@@ -130,12 +129,17 @@ function createFileIfNotExists() {
 
 function menu() {
 
+    if [ $# -lt 1 ]; then
+        exitWithError $LINENO \
+        "Mínimo número de parámetros: 1" 3
+    fi
+
     case $1 in
-        -h|--help)        help;;
-        -a|--add)        shift;     add "$@";;
-        -s|--search)    shift;    search "$@";;
-        -l|--list)        list;;
-        -t|--total)        total;;
+        -h|--help)                  help;;
+        -a|--add)    shift;     add "$@";;
+        -s|--search) shift;  search "$@";;
+        -l|--list)                  list;;
+        -t|--total)                total;;
         *) exitWithError $LINENO "Opción '$1' inválida." 1
     esac
 }
